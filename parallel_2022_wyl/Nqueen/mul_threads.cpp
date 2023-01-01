@@ -32,9 +32,7 @@ int main(){
 //递归回溯，按照labudadong的模板写的
 void impl(list<int> &path,int cboard[]){
 	int n;
-	// omp_set_lock(&listlock);
 	n = path.size();
-    // omp_unset_lock(&listlock);
     if (n==N){
         omp_set_lock(&resultlock);
         result++;
@@ -42,19 +40,13 @@ void impl(list<int> &path,int cboard[]){
         return;
     }
     for (int i=0;i<N;i++){
-        // omp_set_lock(&listlock);
         bool flag=skip(path,cboard[i]);
-        // omp_unset_lock(&listlock);
         if (flag)
             continue;
-        // omp_set_lock(&listlock);
 		path.push_back(cboard[i]);
-        // omp_unset_lock(&listlock);
-        #pragma omp task
+        #pragma omp task shared(cboard)
         impl(path,cboard);
-		// omp_set_lock(&listlock);
 		path.pop_back();
-        // omp_unset_lock(&listlock);
     }
 }
 
