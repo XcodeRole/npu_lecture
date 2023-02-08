@@ -36,7 +36,7 @@ void readmv(/*string filename,*/ double **&matrix,double *&vector,int dim){
         matrix[i]=(double *)malloc(dim*sizeof(double));
         for (int j=0;j<dim;j++){
             // in>>matrix[i][j];
-            matrix[i][j]=rand();
+            matrix[i][j]=1;
         }
     }
     
@@ -47,19 +47,19 @@ void readmv(/*string filename,*/ double **&matrix,double *&vector,int dim){
     if ( pid/ int(sqrt(world_size)) == pid% int(sqrt(world_size)) ){
         for (int i=0;i<dim;i++){
             // in>>vector[i];
-            vector[i]=rand();
+            vector[i]=1;
         }
         
     }
     // cout<<pid<<" "<<pid % int(sqrt(world_size))<<endl;
     //对角线上的进程将向量广播到同一列的广播域中
-    // MPI_Bcast(
-    //     vector,
-    //     dim,
-    //     MPI_DOUBLE,
-    //     pid % int(sqrt(world_size)), //对角线上的进程在col_comm通信域中的进程id
-    //     col_comm
-    // );
+    MPI_Bcast(
+        vector,
+        dim,
+        MPI_DOUBLE,
+        pid % int(sqrt(world_size)), //对角线上的进程在col_comm通信域中的进程id
+        col_comm
+    );
     
 }
 
@@ -89,10 +89,25 @@ void gemm(const double *const *matrix,const double *vector_in,double *&vector_ou
         MPI_DOUBLE,
         MPI_SUM,
         // pid/int(sqrt(world_size)), //对角线矩阵快对应进程在行通信域中的进程id
-        int(sqrt(world_size))-1, //按照要求保存到最后一列
+        int(sqrt(world_size))-1,      //按照要求保存到最后一列
         row_comm
     );
     vector_out=recv_buff;
+}
+
+void demand3(double * vector,int dim){
+    int col_rank;
+    int col_size;
+    MPI_Comm_rank(col_comm,&col_rank);
+    MPI_Comm_size(col_comm,&col_size);
+    for (int i=0;i<col_size;i++){
+        if (col_rank==i){
+            for(int j=0;j<dim;j++){
+                cout<<vector[j]<<endl;
+            }
+        }
+        MPI_Barrier(col_comm);
+    }
 }
 
 
@@ -128,6 +143,11 @@ int main(){
     // }
     cout<<"\n"<<"readfile cost: "<<double(t2-t1)/CLOCKS_PER_SEC<<"s"<<endl;
     cout<<"caculate cost: "<<double(t3-t2)/CLOCKS_PER_SEC<<"s"<<endl;
+
+    //需求3，将计算结果顺序输出
+    if (pid % int(sqrt(world_size))==int(sqrt(world_size)-1)){
+        demand3(vector_out,dim);
+    }
 
     MPI_Finalize();
 }

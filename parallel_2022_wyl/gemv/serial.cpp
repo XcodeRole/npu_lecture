@@ -19,13 +19,13 @@ void readmv(/*string filename,*/ double **&matrix,double *&vector/*,int &n*/){
         matrix[i]=(double *)malloc(N*sizeof(double));
         for (int j=0;j<N;j++){
             // in>>matrix[i][j];
-            matrix[i][j]=rand();
+            matrix[i][j]=1;
         }
     }
     vector=(double *)malloc(N*sizeof(double));
     for (int i=0;i<N;i++){
         // in>>vector[i];
-        vector[i]=rand();
+        vector[i]=1;
     }
     // in.close();
 }
