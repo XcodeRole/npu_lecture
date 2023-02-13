@@ -15,3 +15,12 @@ K-means算法的步骤为：
 1）基于MPI或OpenMP并行编程，设计并实现k-means算法的并行程序。
 2）采用UCI的用于聚类的数据集（https://archive.ics.uci.edu/ml/index.php）。
 3）测试并分析并行程序的时间性能。
+
+运行代码：
+usage: ./run.sh <arguments> [num_cores]
+num_cores:    using num_cores to parallel
+arguments:
+-h,--help     echo usage
+-s            run serial code
+-t num_cores  run mul_threads using num_cores threads
+-p num_cores  run mul_processes using num_cores processes

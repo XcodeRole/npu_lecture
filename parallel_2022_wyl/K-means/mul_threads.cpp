@@ -6,7 +6,10 @@
 #include <cmath>
 #include <limits.h>
 #include <omp.h>
+#include <chrono>
+
 using namespace std;
+using namespace chrono;
 #define K 16
 
 
@@ -54,6 +57,7 @@ void updateCluster(const double *const* matrix,const int row_dim,const int col_d
     for(int i=0;i<K;i++){
         cluster[i].clear();
     }
+    // 这里single字句会隐式同步，所以不需要barrier
     // #pragma omp barrier
     //遍历所有样本点，也就是矩阵matrix的行向量，重新划分聚类
     #pragma omp for
@@ -120,23 +124,23 @@ void k_means(const double *const* matrix,const int row_dim,const int col_dim){
     double pre_sse=0;
     getSSE(matrix,row_dim,col_dim,center,cluster,pre_sse);
     double delta_sse;
+    //核心迭代，直到收敛
     do{
         double sse=0;
-        #pragma omp parallel default(shared) num_threads(4)
+        #pragma omp parallel default(shared)
         {
             updateCluster(matrix,row_dim,col_dim,center,cluster);
             updateCenter(matrix,row_dim,col_dim,center,cluster);
             getSSE(matrix,row_dim,col_dim,center,cluster,sse);
-            // #pragma omp barrier
             #pragma omp single
             {
                 delta_sse=fabs(sse-pre_sse);
-                cout<<"delta_sse="<<delta_sse<<endl;
+                // cout<<"delta_sse="<<delta_sse<<endl;
                 pre_sse=sse;
             }
-            // #pragma omp barrier
         }
     }while(delta_sse>1e-8);
+
 
     for (int i=0;i<K;i++){
         cout<<"cluster "<<i<<": ";
@@ -150,10 +154,12 @@ void k_means(const double *const* matrix,const int row_dim,const int col_dim){
 int main(){
     double **matrix;
     int row_dim,col_dim;
-    string filename="samples.txt";
+    string filename="samples.data";
 
     //读取数据矩阵，行，列
     readmatrix(filename,matrix,row_dim,col_dim);
-
+    auto t0=steady_clock::now();
     k_means(matrix,row_dim,col_dim);
+    auto t1=steady_clock::now();
+    cout<<"computation time:"<<duration_cast<milliseconds>(t1-t0).count()<<"ms"<<endl;
 }

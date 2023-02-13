@@ -36,7 +36,7 @@ void readmv(/*string filename,*/ double **&matrix,double *&vector,int dim){
         matrix[i]=(double *)malloc(dim*sizeof(double));
         for (int j=0;j<dim;j++){
             // in>>matrix[i][j];
-            matrix[i][j]=1;
+            matrix[i][j]=rand();
         }
     }
     
@@ -47,7 +47,7 @@ void readmv(/*string filename,*/ double **&matrix,double *&vector,int dim){
     if ( pid/ int(sqrt(world_size)) == pid% int(sqrt(world_size)) ){
         for (int i=0;i<dim;i++){
             // in>>vector[i];
-            vector[i]=1;
+            vector[i]=rand();
         }
         
     }
@@ -129,20 +129,18 @@ int main(){
 
     // int n;
     // string filename="sample.txt";
-    
-    clock_t t1=clock();
+
     //从文件读入当前进程的数据matrix以及vector_in
     readmv(/*filename,*/matrix,vector_in,dim);
 
-    clock_t t2=clock();
+
     gemm(matrix,vector_in,vector_out,dim);
 
-    clock_t t3=clock();
+
     // for(int i=0;i<n;i++){
     //     cout<<vector_out[i]<<" ";
     // }
-    cout<<"\n"<<"readfile cost: "<<double(t2-t1)/CLOCKS_PER_SEC<<"s"<<endl;
-    cout<<"caculate cost: "<<double(t3-t2)/CLOCKS_PER_SEC<<"s"<<endl;
+    // cout<<"caculate cost: "<<double(t3-t2)/CLOCKS_PER_SEC<<"s"<<endl;
 
     //需求3，将计算结果顺序输出
     if (pid % int(sqrt(world_size))==int(sqrt(world_size)-1)){

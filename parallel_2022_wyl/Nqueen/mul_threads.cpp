@@ -3,7 +3,9 @@
 #include<list>
 #include<algorithm>
 #include<omp.h>
+#include <chrono>
 using namespace std;
+using namespace chrono;
 #define N 14
 
 int result=0;
@@ -20,19 +22,21 @@ int main(){
     }
     list<int> path(0);
     // omp_init_lock(&listlock);
+    auto t0=steady_clock::now();
     omp_init_lock(&resultlock);
-    #pragma omp parallel default(shared) num_threads(2)
+    #pragma omp parallel default(shared)
     {
 		#pragma omp single
 		impl(path,cboard); 
     }
-    cout<<result<<endl;
+    auto t1=steady_clock::now();
+    cout<<"computation time:"<<duration_cast<milliseconds>(t1-t0).count()<<"ms"<<endl;
+    cout<<"共有"<<result<<"种解法"<<endl;
 }   
 
-//递归回溯，按照labudadong的模板写的
+//递归回溯，根据labudadong的模板改的
 void impl(list<int> &path,int cboard[]){
-	int n;
-	n = path.size();
+	int n = path.size();
     if (n==N){
         omp_set_lock(&resultlock);
         result++;

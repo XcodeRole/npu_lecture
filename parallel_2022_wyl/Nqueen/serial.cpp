@@ -2,9 +2,14 @@
 //频繁增删，使用list
 #include<list>
 #include<algorithm>
+#include <chrono>
 using namespace std;
+using namespace chrono;
+
+//控制 N 的值
 #define N 14
 
+//解的个数
 int result=0;
 
 void impl(list<int> &path,int cboard[]);
@@ -15,11 +20,14 @@ int main(){
         cboard[i]=i;
     }
     list<int> path(0);
+    auto t0=steady_clock::now();
     impl(path,cboard);
-    cout<<result<<endl;
+    auto t1=steady_clock::now();
+    cout<<"computation time:"<<duration_cast<milliseconds>(t1-t0).count()<<"ms"<<endl;
+    cout<<"共有"<<result<<"种解法"<<endl;
 }   
 
-//递归回溯，按照labudadong的模板写的
+//递归回溯，根据labudadong的模板改的
 void impl(list<int> &path,int cboard[]){
     if (path.size()==N){
         result++;

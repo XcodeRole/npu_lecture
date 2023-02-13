@@ -5,7 +5,10 @@
 #include <set>
 #include <cmath>
 #include <limits.h>
+#include <chrono>
+
 using namespace std;
+using namespace chrono;
 #define K 16
 
 
@@ -119,26 +122,29 @@ void k_means(const double *const* matrix,const int row_dim,const int col_dim){
         updateCenter(matrix,row_dim,col_dim,center,cluster);
         sse=getSSE(matrix,row_dim,col_dim,center,cluster);
         delta_sse=fabs(sse-pre_sse);
-        cout<<"delta_sse="<<delta_sse<<endl;
+        // cout<<"delta_sse="<<delta_sse<<endl;
         pre_sse=sse;
     }while(delta_sse>1e-8);
     
-    for (int i=0;i<K;i++){
-        cout<<"cluster "<<i<<": ";
-        for (auto iter=cluster[i].begin();iter!=cluster[i].end();iter++){
-            cout<<*iter<<" ";
-        }
-        cout<<endl;
-    }
+    // for (int i=0;i<K;i++){
+    //     cout<<"cluster "<<i<<": ";
+    //     for (auto iter=cluster[i].begin();iter!=cluster[i].end();iter++){
+    //         cout<<*iter<<" ";
+    //     }
+    //     cout<<endl;
+    // }
 }
 
 int main(){
     double **matrix;
     int row_dim,col_dim;
-    string filename="samples.txt";
+    string filename="samples.data";
 
     //读取数据矩阵，行，列
     readmatrix(filename,matrix,row_dim,col_dim);
 
+    auto t0=steady_clock::now();
     k_means(matrix,row_dim,col_dim);
+    auto t1=steady_clock::now();
+    cout<<"computation time:"<<duration_cast<milliseconds>(t1-t0).count()<<"ms"<<endl;
 }
